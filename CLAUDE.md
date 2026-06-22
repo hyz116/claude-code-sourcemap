@@ -8,6 +8,14 @@ This is an **unofficial research-only** reconstruction of `@anthropic-ai/claude-
 
 The restored source lives in `restored-src/src/`. The `docs/` directory contains architecture analysis in Chinese.
 
+## Research Synthesis Discipline
+
+When writing wiki concept pages / 设计原则 / insight 文档 / 综合分析 in `docs/`, follow the bias checklist in auto-memory `research-synthesis-bias-checklist` (loaded via MEMORY.md). Specifically: label claims as OBS/INF/SPEC/NARR; check the 9 induction biases before each section; apply the "+1 怀疑度 per abstraction level" principle.
+
+Does **not** apply to: code editing, debugging, descriptive code documentation, or skill executions.
+
+The full self-critique record (4 rounds) is in `docs/insights/3.SELF_CRITIQUE.md`.
+
 ## No Build/Test Commands
 
 This repo has no build pipeline — the source is a read-only research artifact. The only script in `package.json` is a guard that prevents unauthorized publishing. There are no runnable tests in this repo.
