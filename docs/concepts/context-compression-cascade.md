@@ -278,6 +278,6 @@ const MAX_CONSECUTIVE_AUTOCOMPACT_FAILURES = 3
 
 - 上层概念：（无；本概念是上下文管理的顶层）
 - 反面对照：[[multi-tier-degradation]]（失败恢复版本）vs 本概念（token 经济版本）；[[circuit-breaker]] 是本概念中 autocompact 失败处理的具体应用
-- 协同机制：[[flag-vs-hardcode]]（`tengu_cache_plum_violet` 毕业是 microcompact 路径切换的样本）；[[result-delivery-guarantee]] 的磁盘溢出是输入侧管理，本概念是累积侧管理
+- 协同机制：[[flag-vs-hardcode]]（`tengu_cache_plum_violet` 毕业是 microcompact 路径切换的样本）；[[result-delivery-guarantee]] 的磁盘溢出是输入侧管理，本概念是累积侧管理；[[session-memory]] 是 ④ autocompact 的**预计算旁路**——后台增量维护好摘要，压缩时直接拿，绕过同步 LLM 总结
 - 相关实体：`services/compact/`（4 级模块所在）、`query.ts:396-468`（编排主循环）、`services/compact/microCompact.ts`（②）、`services/compact/autoCompact.ts`（④）、`services/compact/prompt.ts`（autocompact 总结 prompt）、`services/compact/timeBasedMCConfig.ts`（time-based 触发）
 - 综合分析：[1.CORE_LOOP.md](../1.CORE_LOOP.md)（query.ts 主循环结构）

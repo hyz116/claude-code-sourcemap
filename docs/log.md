@@ -325,3 +325,45 @@
   - **反向应用比顺向学习收获大 3 倍**："Claude Code 这样做，我电商代码是怎么做的"——用 wiki 校准自己的电商实践
   - **可信度排序提示**：直接读"反 pattern 速查表"实战价值最高，"3 条贯穿线"等抽象层最低
 - 跟 [[3.SELF_CRITIQUE]] 的关系：本笔记是 SELF_CRITIQUE 显化的可信度结构在**消费侧**的具体应用——告诉读者哪些章可抄、哪些带怀疑读、哪些跳过
+
+## [2026-06-22] ingest | Anthropic 官方上下文工程文章录入
+
+- 来源：Anthropic Engineering Blog《Effective context engineering for AI agents》(2025-09-29)，https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+  - 内置 WebFetch 被 403，改用 tavily_extract (advanced) 取全文
+- 产出：insights/context-engineering-anthropic.md（外部参考 / 官方一手来源）
+- 归类决策：放 insights/ 而非 concepts/——SCHEMA 明确 insights/ 含"外部参考"，且与 1.LLM_WIKI_PATTERN（Karpathy 外部源）同类；文件名用描述性非编号（参照已有 AI公司员工...调研报告.md 先例，编号序列留给作者原创综合）
+- 信任定位（关键）：本页是 **NARR/官方一手叙述**，与 wiki 绝大多数 concept 页（源码事后归纳的 OBS/INF 假说，且声明"非 Anthropic 设计哲学"）信任级别不同。页首加显式 disclaimer 区分两者，避免把博客措辞当源码逐行断言
+- 文章核心：上下文=有限且边际递减资源 → "最小高信号 token 集"原则；注意力预算/上下文腐烂（n² 注意力）；优质上下文解剖（system prompt 恰当海拔 / 工具防臃肿 / few-shot 精选）；即时检索 + 混合策略（CLAUDE.md 预载 + glob/grep 即时取）；长周期三技术（压缩 / 结构化笔记 / 子 Agent）
+- 双向链接：与 [[context-compression-cascade]]（强印证——官方讲单层兜底压缩，concept 页挖出 4 级级联 + 3P/Ant 差异，互补非互替）、[[coordinator-mode]]、3.MULTI_AGENT、multi-tier-degradation、result-delivery-guarantee 建立映射
+- 发现的缺口（留待 ingest）：结构化笔记/memory tool 对应 services/SessionMemory/ 暂无独立 concept 页
+- index.md + insights/README.md 已同步加行
+
+## [2026-06-23] verify | 官方上下文工程文章逐条源码核查
+
+- 触发：用户要求对 insights/context-engineering-anthropic.md 的实现性断言做 ground-truth 交叉验证
+- 方法：把文章 10 条对 Claude Code 实现的实质断言逐条拿到 restored-src/src/ 比对，证据均 file:line 直引（OBS）
+- 结果：7 条精确确认 / 1 条确认但被文章简化 / 2 条有张力或数字未坐实
+  - ✅ 精确确认：压缩+5文件（compact.ts:122 POST_COMPACT_MAX_FILES_TO_RESTORE=5）、tool result clearing 占位符（microCompact.ts:36 精确字符串）、transcript 逃生口（prompt.ts:340-350）、CLAUDE.md prepended（context.ts:153）、glob/grep、子agent干净上下文、note-taking 三机制（TodoWrite/SessionMemory/agentMemory）
+  - ⚠️ 简化：压缩 prompt 实际 9 段（prompt.ts:61-77），文章只挑了 3 类
+  - ⚠️ 张力 #8：文章把 head/tail 当 just-in-time 卖点，但 BashTool/prompt.ts:287 明确劝阻"读文件用 Read 不要 head/tail"——场景不同不矛盾，但泛化措辞误导
+  - ⚠️ 数字未坐实 #5：子 agent "1000-2000 token 摘要"是 emergent 观察值，源码无硬限制（仅 AgentTool/prompt.ts:107 "under 200 words" 软引导）——NARR 勿当 OBS 常量
+- 产出：把核查表折进 insights/context-engineering-anthropic.md 新增「逐条交叉验证」section，页面从纯 NARR 升级为 NARR+OBS 验证
+- 方法论意义：印证页首信任定位——官方一手叙述可信但需对照源码校准；2 处张力都是"博客为讲故事泛化"与"读者把统计当常量"的典型偏差
+
+## [2026-06-23] ingest | Session Memory 概念页（补文章 §② 缺口）
+
+- 触发：交叉验证发现文章 §② 结构化笔记对应 services/SessionMemory/ 但 wiki 无独立页；用户要求补
+- 通读源码：SessionMemory/{sessionMemory,prompts,sessionMemoryUtils}.ts + compact/sessionMemoryCompact.ts（关键函数）+ filesystem.ts 路径
+- 产出：concepts/session-memory.md（按 concept 页纪律，全程 OBS/INF/SPEC 标注 + 防 9 类归纳偏差）
+- 核心结论（OBS）：
+  - SessionMemory = 后台 forked 子 agent（post-sampling hook，仅 repl_main_thread）周期性把会话要点 Edit 进 {sessionId}/session-memory/summary.md（10 段固定模板）
+  - 子 agent 权限锁死：createMemoryFileCanUseTool 只允许 Edit 那一个文件，其它全 deny（能力隔离，呼应 ground-truth-via-tools）
+  - 阈值：init 10K tokens / update 需 token 增长 5K + 3 工具调用（token 门槛永远必需）；复用 autocompact token 口径
+  - **真正落点**：trySessionMemoryCompaction 把这份笔记当压缩摘要用，绕过 autocompact 的同步 LLM 总结——压缩成本分摊到后台增量做
+- 关键 INF（本页核心价值）：
+  - 纠正文章 §② 的两点偏离：① 不是 agent 自导而是系统编排后台 fork；② 首要目的是喂压缩不是"以后读回"
+  - CC 有**两种笔记 flavor**：TodoWrite（agent 自导/in-context/工作记忆，对应文章举例）vs SessionMemory（系统编排/out-of-context/压缩预算）——文章把两者混为一谈
+  - SessionMemory ≠ 文章的 "public beta memory tool"（后者是 Developer Platform 用户可见 API），命名相近勿混
+- 3P 状态：GrowthBook 运行时 flag tengu_session_memory（默认 false），非 bun feature() DCE → 代码进 3P 包但默认关；压缩集成自标 EXPERIMENT
+- 双向链接：context-compression-cascade（④ 协同机制加 session-memory 旁路）；context-engineering-anthropic 映射表 §② 从"缺口"改为已落地 + 两 flavor 发现；index.md 加行
+- 留待追问：sessionMemoryCompact.ts ~500 行未细读（保留窗口算法）；tengu_session_memory 实际灰度范围（SPEC）；plan 文件/agentMemory/SessionMemory 三套记忆边界

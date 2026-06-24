@@ -23,6 +23,7 @@
 |------|------|
 | [insights/0.CONCEPT_ANATOMY.md](insights/0.CONCEPT_ANATOMY.md) | 八维概念解剖：辩证刀、形式刀、历史刀等切面透视 Claude Code |
 | [insights/1.LLM_WIKI_PATTERN.md](insights/1.LLM_WIKI_PATTERN.md) | Karpathy 的 LLM Wiki 模式：持久化知识库的增量构建方法论 |
+| [insights/context-engineering-anthropic.md](insights/context-engineering-anthropic.md) | **外部参考/官方一手来源**：Anthropic《Effective context engineering》全文摘录——注意力预算/上下文腐烂 + 优质上下文解剖 + 即时检索 + 长周期三技术（压缩/笔记/子Agent）。补齐 concept 页缺失的"意图侧"证据 |
 | [insights/2.DESIGN_PRINCIPLES.md](insights/2.DESIGN_PRINCIPLES.md) | 24 篇 concept 页**事后归纳的设计假说**（带认知边界框：明确不是 Anthropic 的设计哲学）：5 簇假说 + 反 pattern 速查 + 3 条校准后的贯穿线 |
 | [insights/3.SELF_CRITIQUE.md](insights/3.SELF_CRITIQUE.md) | 4 轮自我批判后浮现的研究方法论失败模式：9 类归纳偏差 + 抽象阶梯（4 层）+ 写作检查清单 + 5 个认识论原因。**本 wiki 可信度结构的元说明** |
 
@@ -55,6 +56,7 @@
 | [concepts/tool-args-prevalidation.md](concepts/tool-args-prevalidation.md) | 工具参数预执行 7 步管线：Zod / hint / validateInput / 防伪造剥离 / 双 input 分流 / hooks / 权限——LLM-friendly 错误回流让模型自动 retry |
 | [concepts/tool-concurrency-streaming.md](concepts/tool-concurrency-streaming.md) | 工具并发与流式执行：isConcurrencySafe 三态判定 + 失败传播按工具语义非对称（仅 Bash 错误 cancel 兄弟）+ 三层 AbortController + 进度与结果分流 |
 | [concepts/context-compression-cascade.md](concepts/context-compression-cascade.md) | 上下文压缩四级级联：Snip / Microcompact / Context Collapse / Autocompact，按代价/失真梯度排序——3P 公开版只跑 Autocompact 兜底，4 级精细控制是 Ant 内部 |
+| [concepts/session-memory.md](concepts/session-memory.md) | Session Memory：后台 forked 子agent 增量写固定模板 summary.md → 压缩时当摘要绕过同步 LLM 总结；区分 TodoWrite(in-context)与 SessionMemory(压缩预算)两种笔记 flavor；GrowthBook flag 门控(默认关) |
 | [concepts/prompt-cache-editing.md](concepts/prompt-cache-editing.md) | Prompt Cache Editing API：非公开 first-party-only beta，cache_edits 块远程删除 tool_result 不 invalidate cache + sticky-on latch + pinned edits + 内部 Mycro/KVCC 术语泄露 |
 | [concepts/plan-mode-state-machine.md](concepts/plan-mode-state-machine.md) | Plan Mode 完整状态机：prePlanMode 栈顶寄存器 + 4 种 auto×plan 交叉 + Circuit-breaker 退出降级 + 文件持久化 3 层恢复 + Teammate 分布式审批 |
 | [concepts/bash-command-classification.md](concepts/bash-command-classification.md) | Bash 命令权限分类：tree-sitter AST 解析（fail-closed） + Zsh/PowerShell 危险模式 + Fig spec 前缀深度 + Haiku 兜底提取——多 shell 攻击面分别建模 |
